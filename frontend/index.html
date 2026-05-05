@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Incident Dashboard</h2>
+<button onclick="load()">Load Incidents</button>
+
+<ul id="list"></ul>
+
+<script>
+async function load() {
+  const res = await fetch("http://127.0.0.1:8000/incidents");
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(i => {
+    const li = document.createElement("li");
+    li.innerText = `ID: ${i.id} | ${i.component_id} | ${i.status}`;
+    list.appendChild(li);
+  });
+}
+</script>
+
+</body>
+</html>

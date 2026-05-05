@@ -2,7 +2,7 @@ from kafka import KafkaConsumer
 import json
 
 from backend.consumer.debounce import get_or_create_key, get_existing_work_id, set_work_id
-from storage.postgres import create_work_item, store_signal
+from backend.consumer.storage.postgres import create_work_item, store_signal
 
 consumer = KafkaConsumer(
     "signals",
