@@ -1,55 +1,14 @@
-                    +----------------------+
-                    |   Client / Services  |
-                    +----------+-----------+
-                               |
-                          (Ingress)
-                               |
-                    +----------v-----------+
-                    |  FastAPI Ingestion   |
-                    |  - Rate Limit        |
-                    |  - Validation        |
-                    +----------+-----------+
-                               |
-                          (Async Push)
-                               |
-                        +------v------+
-                        |   Kafka     |
-                        |  (signals)  |
-                        +------+------+
-                               |
-                    +----------v-----------+
-                    |  Consumer Workers   |
-                    |  - Debounce (Redis) |
-                    |  - Processing       |
-                    +----+----+----+------+
-                         |    |    |
-          +--------------+    |    +----------------+
-          |                   |                     |
-+---------v--------+  +-------v-------+   +---------v--------+
-|     Redis        |  |  PostgreSQL   |   |       S3         |
-| (Hot Cache +     |  | (Source of    |   | (Raw Signals)    |
-|  Debounce Keys)  |  |  Truth)       |   |                  |
-+------------------+  +---------------+   +------------------+
-                              |
-                      +-------v--------+
-                      |   Query API    |
-                      +-------+--------+
-                              |
-                        +-----v------+
-                        |  Frontend  |
-                        +------------+
-
-Observability:
-Prometheus → metrics
-Grafana → dashboards
-Alertmanager → alerts
-
-
 # Incident Management System (IMS)
 
 ## Architecture
 
 FastAPI → Kafka → Consumer → Redis (debounce) → Postgres → Metrics
+
+## Architecture Flow
+
+Client → FastAPI → Kafka → Consumer → Redis (Debounce) → PostgreSQL  
+                                  ↓  
+                              Prometheus Metrics
 
 ## Features
 
@@ -87,3 +46,15 @@ PYTHONPATH=. python backend/consumer/worker.py
 - Uses Redis for debounce
 - PostgreSQL for persistence
 - Kafka for async processing
+
+
+## Example Flow
+
+1. Send signal → POST /signals
+2. Kafka queues event
+3. Consumer processes:
+   - Debounce via Redis
+   - Creates/links incident
+4. Add RCA → POST /incidents/{id}/rca
+5. Resolve → POST /resolve
+6. Close → POST /close
